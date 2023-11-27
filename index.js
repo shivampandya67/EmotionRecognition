@@ -20,12 +20,17 @@ function convertImageToTensor(image) {
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const tensorData = new Float32Array(imageData);
+                console.log('Image Data Length:', imageData.length);
 
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
 
                 // Reshape the tensor data to match the expected input size
+                const tensorData = new Float32Array(imageData);
+
+                console.log('Expected Dims:', expectedDims);
+                console.log('Reshaped Tensor Data Length:', tensorData.length);
+
                 const tensor = new onnx.Tensor(tensorData, 'float32', expectedDims);
 
                 resolve(tensor);
