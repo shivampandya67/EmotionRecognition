@@ -12,11 +12,19 @@ function convertImageToTensor(image) {
             imgElement.src = e.target.result;
 
             imgElement.onload = () => {
+                // Create a canvas with a fixed size (e.g., 48x48)
                 const canvas = document.createElement('canvas');
-                canvas.width = 48;
-                canvas.height = 48;
-                const ctx = canvas.getContext('2d');
+                const targetSize = 48;
 
+                // Resize the image while maintaining aspect ratio
+                const scaleFactor = Math.min(targetSize / imgElement.width, targetSize / imgElement.height);
+                canvas.width = imgElement.width * scaleFactor;
+                canvas.height = imgElement.height * scaleFactor;
+
+                // Pad the remaining area with white pixels
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
