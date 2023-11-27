@@ -41,8 +41,8 @@ function convertImageToTensor(image) {
                 
 
                 // Debugging output
-                console.log('Normalized Data Length:', normalizedData.length);
-                console.log('Expected Dims Product:', expectedDims.reduce((a, b) => a * b, 1));
+                console.log('Normalized:', normalizedData.length);
+                console.log('Expected:', expectedDims.reduce((a, b) => a * b, 1));
 
                 // Ensure that the normalized data length matches the expected size
                 if (normalizedData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
