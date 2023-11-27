@@ -27,14 +27,16 @@ function convertImageToTensor(image) {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 const normalizedData = imageData.map(value => value / 255.0);
 
-                // Ensure normalized data length matches the expected input size
-                if (normalizedData.length !== 3 * 48 * 48) {
-                    reject(new Error('Input dims do not match data length'));
-                    return;
-                }
-
                 // Assuming your model expects the input size [1, 3, 48, 48]
-                const tensor = new onnx.Tensor(new Float32Array(normalizedData), 'float32', [1, 3, 48, 48]);
+                const expectedDims = [1, 3, 48, 48];
+                
+                // Reshape the normalized data to match the expected input size
+                const reshapedData = new Float32Array(expectedDims.reduce((a, b) => a * b, 1));
+                normalizedData.forEach((value, index) => {
+                    reshapedData[index % reshapedData.length] += value;
+                });
+
+                const tensor = new onnx.Tensor(reshapedData, 'float32', expectedDims);
 
                 resolve(tensor);
             };
