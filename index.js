@@ -45,13 +45,13 @@ function convertImageToTensor(image) {
 
 // Load the ONNX model
 const session = new onnx.InferenceSession();
-session.loadModel("emotion_recognition_model.onnx");
+const modelPromise = session.loadModel("emotion_recognition_model.onnx");
 
 // Function to run inference on the uploaded image
 async function runInference() {
     try {
         // Ensure the session is initialized
-        await session.initialize();
+        await modelPromise;
 
         // Get the input image from the file input
         const fileInput = document.getElementById("imageInput");
