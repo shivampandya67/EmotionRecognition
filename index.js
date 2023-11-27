@@ -50,43 +50,33 @@ function convertImageToTensor(image) {
     });
 }
 
-// Function to run inference on the uploaded image
+
 async function runInference() {
-    const fileInput = document.getElementById("imageInput");
-    const image = fileInput.files[0];
+    // Ensure the session is initialized before running inference
+    await session.initialize();
 
-    try {
-        const tensor = await convertImageToTensor(image);
-        const outputTensor = await session.run([tensor]);
-        const predictedEmotion = processOutput(outputTensor);
-
-        const outputDiv = document.getElementById("output");
-        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-
-// Function to run inference on the uploaded image
-async function runInference() {
     // Get the input image from the file input
     const fileInput = document.getElementById("imageInput");
     const image = fileInput.files[0];
 
-    // Preprocess the image (convert to tensor, resize, normalize, etc.)
-    const tensor = await preprocessImage(image);
+    try {
+        // Preprocess the image (convert to tensor, resize, normalize, etc.)
+        const tensor = await convertImageToTensor(image);
 
-    // Run inference
-    const outputTensor = await session.run([tensor]);
+        // Run inference
+        const outputTensor = await session.run([tensor]);
 
-    // Process the output (interpret the result)
-    const predictedEmotion = processOutput(outputTensor);
+        // Process the output (interpret the result)
+        const predictedEmotion = processOutput(outputTensor);
 
-    // Display the result on the webpage
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+        // Display the result on the webpage
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+    } catch (error) {
+        console.error("Error during inference:", error);
+    }
 }
+
 
 // Function to preprocess the image
 async function preprocessImage(image) {
