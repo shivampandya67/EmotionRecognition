@@ -24,16 +24,14 @@ function convertImageToTensor(image) {
 
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
-                
+
                 // Reshape the normalized data to match the expected input size
                 const reshapedData = new Float32Array(expectedDims.reduce((a, b) => a * b, 1));
                 normalizedData.forEach((value, index) => {
                     reshapedData[index % reshapedData.length] += value;
                 });
 
-                const tensor = new onnx.Tensor(reshapedData, 'float32', expectedDims);
-
-                resolve(tensor);
+                resolve(reshapedData);
             };
         };
 
@@ -45,18 +43,20 @@ function convertImageToTensor(image) {
     });
 }
 
-
-
+// Load the ONNX model
 const session = new onnx.InferenceSession();
 session.loadModel("emotion_recognition_model.onnx");
 
 // Function to run inference on the uploaded image
 async function runInference() {
-    // Get the input image from the file input
-    const fileInput = document.getElementById("imageInput");
-    const image = fileInput.files[0];
-
     try {
+        // Ensure the session is initialized
+        await session.initialize();
+
+        // Get the input image from the file input
+        const fileInput = document.getElementById("imageInput");
+        const image = fileInput.files[0];
+
         // Preprocess the image (convert to tensor, resize, normalize, etc.)
         const tensor = await convertImageToTensor(image);
 
