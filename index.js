@@ -2,41 +2,53 @@
 const session = new onnx.InferenceSession();
 session.loadModel("emotion_recognition_model.onnx");
 
+// Placeholder function for image preprocessing
 function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
-        // Create an HTML image element
-        const imgElement = new Image();
-        imgElement.src = URL.createObjectURL(image);
+        const reader = new FileReader();
 
-        // Wait for the image to load
-        imgElement.onload = () => {
-            // Create a canvas element to draw the image
-            const canvas = document.createElement('canvas');
-            canvas.width = 48; // Adjust the width according to your model input size
-            canvas.height = 48; // Adjust the height according to your model input size
-            const ctx = canvas.getContext('2d');
+        reader.onload = function (e) {
+            const imgElement = new Image();
+            imgElement.src = e.target.result;
 
-            // Draw the image on the canvas
-            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            imgElement.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 48; // Adjust the width according to your model input size
+                canvas.height = 48; // Adjust the height according to your model input size
+                const ctx = canvas.getContext('2d');
 
-            // Get the pixel data from the canvas
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
-            // Normalize the pixel values to be in the range [0, 1]
-            const normalizedData = imageData.map(value => value / 255.0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                const normalizedData = imageData.map(value => value / 255.0);
 
-            // Create a tensor from the normalized data
-            const tensor = new onnx.Tensor(new Float32Array(normalizedData), 'float32', [1, 3, canvas.width, canvas.height]);
+                const tensor = new onnx.Tensor(new Float32Array(normalizedData), 'float32', [1, 3, canvas.width, canvas.height]);
 
-            // Resolve with the tensor
-            resolve(tensor);
+                resolve(tensor);
+            };
         };
 
-        // Handle image load errors
-        imgElement.onerror = (error) => {
+        reader.onerror = function (error) {
             reject(error);
         };
+
+        reader.readAsDataURL(image);
     });
+}
+
+// Function to run inference on the uploaded image
+async function runInference() {
+    const fileInput = document.getElementById("imageInput");
+    const image = fileInput.files[0];
+
+    const tensor = await convertImageToTensor(image);
+
+    const outputTensor = await session.run([tensor]);
+
+    const predictedEmotion = processOutput(outputTensor);
+
+    const outputDiv = document.getElementById("output");
+    outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
 }
 
 
