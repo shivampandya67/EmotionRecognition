@@ -25,6 +25,10 @@ function convertImageToTensor(image) {
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
 
+                // Debugging output
+                console.log('Normalized Data Length:', normalizedData.length);
+                console.log('Expected Dims Product:', expectedDims.reduce((a, b) => a * b, 1));
+
                 // Ensure that the normalized data length matches the expected size
                 if (normalizedData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
                     reject(new Error('Input dims do not match data length.'));
