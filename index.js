@@ -18,14 +18,20 @@ function convertImageToTensor(image) {
 
                 // Resize the image while maintaining aspect ratio
                 const scaleFactor = Math.min(targetSize / imgElement.width, targetSize / imgElement.height);
-                canvas.width = imgElement.width * scaleFactor;
-                canvas.height = imgElement.height * scaleFactor;
+                const newWidth = imgElement.width * scaleFactor;
+                const newHeight = imgElement.height * scaleFactor;
+                canvas.width = targetSize;
+                canvas.height = targetSize;
 
-                // Pad the remaining area with white pixels
+                // Center the image on the canvas
+                const xOffset = (targetSize - newWidth) / 2;
+                const yOffset = (targetSize - newHeight) / 2;
+
+                // Draw the image on the canvas
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(imgElement, xOffset, yOffset, newWidth, newHeight);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 const normalizedData = imageData.map(value => value / 255.0);
@@ -34,8 +40,8 @@ function convertImageToTensor(image) {
                 const expectedDims = [1, 3, 48, 48];
 
                 // Debugging output
-                console.log('Normalized Data Length:', normalizedData.length);
-                console.log('Expected Dims Product:', expectedDims.reduce((a, b) => a * b, 1));
+                console.log('Normalized:', normalizedData.length);
+                console.log('Expected:', expectedDims.reduce((a, b) => a * b, 1));
 
                 // Ensure that the normalized data length matches the expected size
                 if (normalizedData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
