@@ -49,30 +49,32 @@ const modelPromise = session.loadModel("emotion_recognition_model.onnx");
 
 // Function to run inference on the uploaded image
 async function runInference() {
+    // Get the input image from the file input
+    const fileInput = document.getElementById("imageInput");
+    const image = fileInput.files[0];
+
     try {
-        // Ensure the session is initialized
-        await modelPromise;
-
-        // Get the input image from the file input
-        const fileInput = document.getElementById("imageInput");
-        const image = fileInput.files[0];
-
         // Preprocess the image (convert to tensor, resize, normalize, etc.)
         const tensor = await convertImageToTensor(image);
 
         // Run inference
-        const outputTensor = await session.run([tensor]);
+        if (session.isInitialized) {
+            const outputTensor = await session.run([tensor]);
 
-        // Process the output (interpret the result)
-        const predictedEmotion = processOutput(outputTensor);
+            // Process the output (interpret the result)
+            const predictedEmotion = processOutput(outputTensor);
 
-        // Display the result on the webpage
-        const outputDiv = document.getElementById("output");
-        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+            // Display the result on the webpage
+            const outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+        } else {
+            console.error("Error: ONNX Runtime session is not initialized.");
+        }
     } catch (error) {
         console.error("Error during inference:", error);
     }
 }
+
 
 // Function to preprocess the image
 async function preprocessImage(image) {
