@@ -25,7 +25,12 @@ function convertImageToTensor(image) {
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
 
-                // Create the tensor directly from the normalized data
+                // Ensure that the normalized data length matches the expected size
+                if (normalizedData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
+                    reject(new Error('Input dims do not match data length.'));
+                    return;
+                }
+
                 const tensor = new onnx.Tensor(normalizedData, 'float32', expectedDims);
 
                 resolve(tensor);
