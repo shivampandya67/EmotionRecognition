@@ -3,7 +3,6 @@ const session = new onnx.InferenceSession();
 session.loadModel("emotion_recognition_model.onnx");
 
 
-// Placeholder function for image preprocessing
 function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
         if (!(image instanceof Blob)) {
@@ -19,8 +18,8 @@ function convertImageToTensor(image) {
 
             imgElement.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = 48; // Adjust the width according to your model input size
-                canvas.height = 48; // Adjust the height according to your model input size
+                canvas.width = 48;
+                canvas.height = 48;
                 const ctx = canvas.getContext('2d');
 
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
@@ -28,7 +27,14 @@ function convertImageToTensor(image) {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 const normalizedData = imageData.map(value => value / 255.0);
 
-                const tensor = new onnx.Tensor(new Float32Array(normalizedData), 'float32', [1, 3, canvas.width, canvas.height]);
+                // Ensure normalized data length matches the expected input size
+                if (normalizedData.length !== 3 * 48 * 48) {
+                    reject(new Error('Input dims do not match data length'));
+                    return;
+                }
+
+                // Assuming your model expects the input size [1, 3, 48, 48]
+                const tensor = new onnx.Tensor(new Float32Array(normalizedData), 'float32', [1, 3, 48, 48]);
 
                 resolve(tensor);
             };
