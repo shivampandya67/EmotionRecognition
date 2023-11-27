@@ -9,7 +9,7 @@ async function runInference() {
     const image = fileInput.files[0];
 
     // Preprocess the image (convert to tensor, resize, normalize, etc.)
-    const tensor = preprocessImage(image);
+    const tensor = await preprocessImage(image);
 
     // Run inference
     const outputTensor = await session.run([tensor]);
@@ -22,15 +22,24 @@ async function runInference() {
     outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
 }
 
-// Placeholder functions, you need to implement these based on your model and preprocessing logic
-function preprocessImage(image) {
-    // Convert the image to a tensor
+// Function to preprocess the image
+async function preprocessImage(image) {
+    // Convert the image to a tensor (implement your logic here)
+    // Example: Assuming you have a function to convert image to tensor
+    const tensor = await convertImageToTensor(image);
+
     // Implement any required preprocessing steps
+
     return tensor;
 }
 
+// Function to process the output tensor
 function processOutput(outputTensor) {
     // Implement logic to interpret the output tensor
-    // Return the predicted emotion
+    // Example: Assuming outputTensor is a Float32Array with confidence scores
+    const maxIndex = outputTensor.indexOf(Math.max(...outputTensor));
+    const emotionClasses = ["Happy", "Sad"];  // Replace with your actual class names
+    const predictedEmotion = emotionClasses[maxIndex];
+
     return predictedEmotion;
 }
