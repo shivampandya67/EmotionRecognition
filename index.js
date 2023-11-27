@@ -1,10 +1,14 @@
 // Load the ONNX model
 const session = new onnx.InferenceSession();
 session.loadModel("emotion_recognition_model.onnx");
-
 // Placeholder function for image preprocessing
 function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
+        if (!(image instanceof Blob)) {
+            reject(new Error('Invalid image parameter'));
+            return;
+        }
+
         const reader = new FileReader();
 
         reader.onload = function (e) {
@@ -41,15 +45,18 @@ async function runInference() {
     const fileInput = document.getElementById("imageInput");
     const image = fileInput.files[0];
 
-    const tensor = await convertImageToTensor(image);
+    try {
+        const tensor = await convertImageToTensor(image);
+        const outputTensor = await session.run([tensor]);
+        const predictedEmotion = processOutput(outputTensor);
 
-    const outputTensor = await session.run([tensor]);
-
-    const predictedEmotion = processOutput(outputTensor);
-
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
+    } catch (error) {
+        console.error('Error:', error);
+    }
 }
+
 
 
 
