@@ -1,6 +1,8 @@
 // Load the ONNX model
 const session = new onnx.InferenceSession();
 session.loadModel("emotion_recognition_model.onnx");
+
+
 // Placeholder function for image preprocessing
 function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
@@ -56,8 +58,6 @@ async function runInference() {
         console.error('Error:', error);
     }
 }
-
-
 
 
 // Function to run inference on the uploaded image
