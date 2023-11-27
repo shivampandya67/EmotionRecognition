@@ -43,9 +43,17 @@ function convertImageToTensor(image) {
     });
 }
 
-// Load the ONNX model
+// Create an ONNX Runtime session
 const session = new onnx.InferenceSession();
-const modelPromise = session.loadModel("emotion_recognition_model.onnx");
+
+// Load the ONNX model
+session.loadModel("emotion_recognition_model.onnx")
+    .then(() => {
+        console.log("Model loaded successfully.");
+    })
+    .catch((error) => {
+        console.error("Error loading the model:", error);
+    });
 
 // Function to run inference on the uploaded image
 async function runInference() {
@@ -58,23 +66,18 @@ async function runInference() {
         const tensor = await convertImageToTensor(image);
 
         // Run inference
-        if (session.isInitialized) {
-            const outputTensor = await session.run([tensor]);
+        const outputTensor = await session.run([tensor]);
 
-            // Process the output (interpret the result)
-            const predictedEmotion = processOutput(outputTensor);
+        // Process the output (interpret the result)
+        const predictedEmotion = processOutput(outputTensor);
 
-            // Display the result on the webpage
-            const outputDiv = document.getElementById("output");
-            outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
-        } else {
-            console.error("Error: ONNX Runtime session is not initialized.");
-        }
+        // Display the result on the webpage
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
     } catch (error) {
         console.error("Error during inference:", error);
     }
 }
-
 
 // Function to preprocess the image
 async function preprocessImage(image) {
