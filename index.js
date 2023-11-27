@@ -40,8 +40,8 @@ function convertImageToTensor(image) {
                 const expectedDims = [1, 3, 48, 48];
 
                 // Debugging output
-                console.log('Normalized:', normalizedData.length);
-                console.log('Expected:', expectedDims.reduce((a, b) => a * b, 1));
+                console.log('Normalized Data Length:', normalizedData.length);
+                console.log('Expected Dims Product:', expectedDims.reduce((a, b) => a * b, 1));
 
                 // Ensure that the normalized data length matches the expected size
                 if (normalizedData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
@@ -49,7 +49,17 @@ function convertImageToTensor(image) {
                     return;
                 }
 
-                const tensor = new onnx.Tensor(normalizedData, 'float32', expectedDims);
+                // Create a Float32Array with the correct size
+                const tensorData = new Float32Array(expectedDims.reduce((a, b) => a * b, 1));
+
+                // Copy the normalized data to the tensor data, skipping the alpha channel
+                for (let i = 0; i < normalizedData.length / 4; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        tensorData[i * 3 + j] = normalizedData[i * 4 + j];
+                    }
+                }
+
+                const tensor = new onnx.Tensor(tensorData, 'float32', expectedDims);
 
                 resolve(tensor);
             };
