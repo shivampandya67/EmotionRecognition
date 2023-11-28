@@ -28,7 +28,7 @@ async function runInference() {
   const tensorX = await preprocessImage(preview); // Preprocess the image
 
   try {
-    const session = await ort.InferenceSession.create('EmotionCnnOnnx.onnx');
+    const session = await ort.InferenceSession.create('emotion_recognition_model.onnx');
     const result = await session.run({ input: tensorX });
     const outputData = result.output.data;
 
