@@ -71,7 +71,6 @@ async function preprocessImage(imageElement) {
 // Function to display the inference results
 function displayResults(outputData) {
   // Example display of results
-??
   const classifiedImage = document.getElementById('classifiedImage');
   const classificationInfo = document.getElementById('classificationInfo');
 
