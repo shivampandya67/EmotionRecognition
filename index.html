@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Recognition</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #imageInput {
-            margin-bottom: 10px;
-        }
-        #output {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>CNN Classifier with Image Upload</title>
+  <style>
+    #resultDisplay {
+      margin-top: 20px;
+    }
+    img {
+      max-width: 400px;
+      max-height: 400px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-    <input type="file" id="imageInput" accept="image/*" />
-    <button onclick="runInference()">Run Inference</button>
-    <div id="output"></div>
+  <h1>CNN Classifier with Image Upload</h1>
 
-    <!-- Include ONNX Runtime JavaScript library -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+  <!-- Image upload input -->
+  <input type="file" accept="image/*" id="imageUpload" onchange="previewImage(event)" />
+  <img id="preview" src="#" alt="Preview Image" style="display:none" />
 
+  <!-- Button to trigger inference -->
+  <input style="background-color: yellow" type="button" value="Run Inference" onclick="runInference()" />
 
-    <!-- Your custom JavaScript file -->
-    <script src="index.js"></script>
+  <!-- Display for result information -->
+  <div id="resultDisplay">
+    <img id="classifiedImage" src="#" alt="Classified Image">
+    <p id="classificationInfo"></p>
+  </div>
+
+  <!-- Script for handling image preview and inference -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
