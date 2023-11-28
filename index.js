@@ -26,7 +26,6 @@ async function runInference() {
     }
 }
 
-// Function to preprocess the image
 async function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
         if (!(image instanceof Blob)) {
@@ -41,6 +40,8 @@ async function convertImageToTensor(image) {
             imgElement.src = e.target.result;
 
             imgElement.onload = () => {
+                console.log('Image loaded successfully.');
+
                 const canvas = document.createElement('canvas');
                 canvas.width = 48;
                 canvas.height = 48;
@@ -49,24 +50,35 @@ async function convertImageToTensor(image) {
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const tensorData = new Float32Array(imageData);
-
+                
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
+                
+                // Ensure that the tensor data length matches the expected input size
+                if (imageData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
+                    console.error('Error: Input dims do not match data length');
+                    reject(new Error('Input dims do not match data length'));
+                    return;
+                }
+
+                // Convert the data to a Float32Array
+                const tensorData = new Float32Array(imageData);
+
                 const tensor = new onnx.Tensor(tensorData, 'float32', expectedDims);
 
+                console.log('Tensor created successfully.');
                 resolve(tensor);
             };
         };
 
         reader.onerror = function (error) {
+            console.error('Error reading image:', error);
             reject(error);
         };
 
         reader.readAsDataURL(image);
     });
 }
-
 // Function to process the output tensor
 function processOutput(outputTensor) {
     // Implement logic to interpret the output tensor
