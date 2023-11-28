@@ -26,6 +26,7 @@ async function runInference() {
     }
 }
 
+// Function to preprocess the image
 async function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
         if (!(image instanceof Blob)) {
@@ -50,10 +51,13 @@ async function convertImageToTensor(image) {
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                
+
                 // Assuming your model expects the input size [1, 3, 48, 48]
                 const expectedDims = [1, 3, 48, 48];
-                
+
+                console.log('Image Data Length:', imageData.length);
+                console.log('Expected Dims:', expectedDims);
+
                 // Ensure that the tensor data length matches the expected input size
                 if (imageData.length !== expectedDims.reduce((a, b) => a * b, 1)) {
                     console.error('Error: Input dims do not match data length');
@@ -63,6 +67,8 @@ async function convertImageToTensor(image) {
 
                 // Convert the data to a Float32Array
                 const tensorData = new Float32Array(imageData);
+
+                console.log('Reshaped Tensor Data Length:', tensorData.length);
 
                 const tensor = new onnx.Tensor(tensorData, 'float32', expectedDims);
 
@@ -79,6 +85,7 @@ async function convertImageToTensor(image) {
         reader.readAsDataURL(image);
     });
 }
+
 // Function to process the output tensor
 function processOutput(outputTensor) {
     // Implement logic to interpret the output tensor
