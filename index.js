@@ -49,13 +49,33 @@ async function convertImageToTensor(image) {
 
 // Function to process the output tensor
 function processOutput(outputTensor) {
-    // Implement logic to interpret the output tensor
-    // Example: Assuming outputTensor is a Float32Array with confidence scores
-    const maxIndex = outputTensor.indexOf(Math.max(...outputTensor));
-    const emotionClasses = ["Happy", "Sad"];  // Replace with your actual class names
-    const predictedEmotion = emotionClasses[maxIndex];
+    // Assuming outputTensor is a Map with numeric keys and Float32Array values
+    const predictedEmotion = getPredictedEmotion(outputTensor);
 
     return predictedEmotion;
+}
+
+// Function to get the predicted emotion from the output tensor
+function getPredictedEmotion(outputTensor) {
+    let maxIndex = -1;
+    let maxScore = Number.NEGATIVE_INFINITY;
+
+    // Iterate through the Map entries to find the index with the maximum score
+    for (const [key, value] of outputTensor.entries()) {
+        const scores = Array.from(value);
+        const maxScoreIndex = scores.indexOf(Math.max(...scores));
+
+        if (scores[maxScoreIndex] > maxScore) {
+            maxScore = scores[maxScoreIndex];
+            maxIndex = maxScoreIndex;
+        }
+    }
+
+    // Replace emotionClasses with your actual class names
+    const emotionClasses = ["Happy", "Sad"];
+
+    // Return the predicted emotion
+    return emotionClasses[maxIndex];
 }
 
 // Function to run inference on the uploaded image
