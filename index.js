@@ -21,18 +21,19 @@ async function convertImageToTensor(image) {
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const tensorData = new Float32Array(3 * 48 * 48);
+                
+                
+                
+                const tensorData = new Float32Array(3 * 48 * 48);  // Use 3 channels
 
-                console.log('Image Data Length:', imageData.length);
-
-                for (let i = 0; i < imageData.length; i += 4) {
+                for (let i = 0, j = 0; i < imageData.length; i += 4, j += 3) {
                     const r = imageData[i] / 255;
                     const g = imageData[i + 1] / 255;
                     const b = imageData[i + 2] / 255;
 
-                    tensorData[i / 4] = r;
-                    tensorData[(i / 4) + (48 * 48)] = g;
-                    tensorData[(i / 4) + (2 * 48 * 48)] = b;
+                    tensorData[j] = r;
+                    tensorData[j + 1] = g;
+                    tensorData[j + 2] = b;
                 }
 
                 const expectedDims = [1, 3, 48, 48];
