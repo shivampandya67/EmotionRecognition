@@ -78,6 +78,9 @@ function getPredictedEmotion(outputTensor) {
     return emotionClasses[maxIndex];
 }
 
+// Declare the ONNX session outside the runInference function
+let session;
+
 // Function to run inference on the uploaded image
 async function runInference() {
     // Get the input image from the file input
@@ -87,6 +90,12 @@ async function runInference() {
     try {
         // Convert the image to a tensor (without normalization)
         const tensor = await convertImageToTensor(image);
+
+        // Check if the ONNX session is initialized
+        if (!session) {
+            // If not, create and load the ONNX session
+            session = await onnx.InferenceSession.create('emotion_recognition_model.onnx');
+        }
 
         // Run inference
         const outputTensor = await session.run([tensor]);
