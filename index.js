@@ -1,9 +1,5 @@
-// Load the ONNX model
-const session = new onnx.InferenceSession();
-session.loadModel("emotion_recognition_model.onnx");
-
-// Function to convert image to tensor
-function convertImageToTensor(image) {
+// Function to convert an image to a tensor
+async function convertImageToTensor(image) {
     return new Promise((resolve, reject) => {
         if (!(image instanceof Blob)) {
             reject(new Error('Invalid image parameter'));
@@ -25,18 +21,19 @@ function convertImageToTensor(image) {
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const normalizedData = imageData.map(value => value / 255.0);
+                const tensorData = new Float32Array(3 * 48 * 48);
 
-                // Assuming your model expects the input size [1, 3, 48, 48]
-                const expectedDims = [1, 3, 48, 48];
-                
-                // Reshape the normalized data to match the expected input size
-                const reshapedData = new Float32Array(expectedDims.reduce((a, b) => a * b, 1));
-                normalizedData.forEach((value, index) => {
-                    reshapedData[index % reshapedData.length] += value;
-                });
+                for (let i = 0; i < imageData.length; i += 4) {
+                    const r = imageData[i] / 255;
+                    const g = imageData[i + 1] / 255;
+                    const b = imageData[i + 2] / 255;
 
-                const tensor = new onnx.Tensor(reshapedData, 'float32', expectedDims);
+                    tensorData[i / 4] = r;
+                    tensorData[(i / 4) + (48 * 48)] = g;
+                    tensorData[(i / 4) + (2 * 48 * 48)] = b;
+                }
+
+                const tensor = new onnx.Tensor('float32', tensorData, [1, 3, 48, 48]);
 
                 resolve(tensor);
             };
@@ -50,6 +47,17 @@ function convertImageToTensor(image) {
     });
 }
 
+// Function to process the output tensor
+function processOutput(outputTensor) {
+    // Implement logic to interpret the output tensor
+    // Example: Assuming outputTensor is a Float32Array with confidence scores
+    const maxIndex = outputTensor.indexOf(Math.max(...outputTensor));
+    const emotionClasses = ["Happy", "Sad"];  // Replace with your actual class names
+    const predictedEmotion = emotionClasses[maxIndex];
+
+    return predictedEmotion;
+}
+
 // Function to run inference on the uploaded image
 async function runInference() {
     // Get the input image from the file input
@@ -57,27 +65,22 @@ async function runInference() {
     const image = fileInput.files[0];
 
     try {
-        // Convert the image to a tensor
+        // Convert the image to a tensor (without normalization)
         const tensor = await convertImageToTensor(image);
 
         // Run inference
         const outputTensor = await session.run([tensor]);
 
-        // Log outputTensor for debugging
-        console.log("Output Tensor:", outputTensor);
+        // Process the output (interpret the result)
+        const predictedEmotion = processOutput(outputTensor);
 
-        // Process the output tensor and display the result on the webpage
-        if (outputTensor.length > 0 && outputTensor[0].data) {
-            const maxIndex = outputTensor[0].data.indexOf(Math.max(...outputTensor[0].data));
-            const emotionClasses = ["Happy", "Sad"];  // Replace with your actual class names
-            const predictedEmotion = emotionClasses[maxIndex];
-
-            const outputDiv = document.getElementById("output");
-            outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
-        } else {
-            console.error("Error: Output tensor is empty or missing data property.");
-        }
+        // Display the result on the webpage
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `Predicted Emotion: ${predictedEmotion}`;
     } catch (error) {
         console.error("Error during inference:", error);
     }
 }
+
+// Add event listener for the file input change
+document.getElementById("imageInput").addEventListener("change", runInference);
