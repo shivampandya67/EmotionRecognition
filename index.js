@@ -23,6 +23,8 @@ async function convertImageToTensor(image) {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 const tensorData = new Float32Array(3 * 48 * 48);
 
+                console.log('Image Data Length:', imageData.length);
+
                 for (let i = 0; i < imageData.length; i += 4) {
                     const r = imageData[i] / 255;
                     const g = imageData[i + 1] / 255;
@@ -33,7 +35,12 @@ async function convertImageToTensor(image) {
                     tensorData[(i / 4) + (2 * 48 * 48)] = b;
                 }
 
-                const tensor = new onnx.Tensor('float32', tensorData, [1, 3, 48, 48]);
+                const expectedDims = [1, 3, 48, 48];
+                console.log('Expected Dims:', expectedDims);
+
+                const tensor = new onnx.Tensor('float32', tensorData, expectedDims);
+
+                console.log('Reshaped Tensor Data Length:', tensor.data.length);
 
                 resolve(tensor);
             };
